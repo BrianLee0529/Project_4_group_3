@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class='container'>
+        <div class='row'>
+            <div class='col-md-12'>
+                <h1>California Housing Prices</h1>
+            </div>
+        </div>
+        <div class='row'>
+            <div class='col-md-6'>
+                <form action="/predict" method='post'>
+                    <label for="city-input">City</label>
+                    <select id="city-input" name='City'>
+                        {% for choice in choices %}
+                        <option value='{{choice["Name"]}}'>{{choice['Name']}}</option>
+                        {% endfor %}
+                    </select>
+                    <input type='number' id='latitude-input' name='Latitude' readonly required>
+                    <input type='number' id='longitude-input' name='Longitude' readonly required>
+                    <br>
+                    <input type="submit" id="submit-cta" value="Submit" disabled>
+                </form>
+                <p>{{prediction_text}}</p>
+            </div>
+            <div class='col-md-6'>
+                <h4>State Map</h4>
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const choices = {{ choices| tojson}};
+
+        const cityInput = document.getElementById('city-input');
+        const latitudeInput = document.getElementById('latitude-input');
+        const longitudeInput = document.getElementById('longitude-input');
+        const submitButton = document.getElementById('submit-cta');
+
+        const map = L.map('map').setView([37.7749, -122.4194], 6);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        function onSelectCity(city) {
+            localStorage.setItem('selectedCity', city.Name);
+
+            latitudeInput.value = city.Latitude;
+            longitudeInput.value = city.Longitude;
+            submitButton.disabled = false;
+
+            map.eachLayer((layer) => {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            const marker = L.marker([city.Latitude, city.Longitude]).addTo(map);
+            marker.bindPopup('<b>' + city.Name + '</b><br>Latitude: ' + city.Latitude + '<br>Longitude: ' + city.Longitude).openPopup();
+            map.setView([city.Latitude, city.Longitude], 9);
+        }
+
+        cityInput.addEventListener('change', (event) => {
+            const selectedCity = choices.find(choice => choice.Name === event.target.value);
+            onSelectCity(selectedCity);
+        });
+
+        const selectedCity = localStorage.getItem('selectedCity');
+        const city = choices.find(choice => choice.Name === selectedCity) || choices[0];
+        cityInput.value = city.Name;
+        onSelectCity(city);
+    </script>
+</body>
+
+</html>
