@@ -34,15 +34,37 @@
                     <label for="city-input">City</label>
                     <select id="city-input" name='City'>
                         {% for choice in choices %}
-                        <option value='{{choice["Name"]}}'>{{choice['Name']}}</option>
+                        <option value='{{ choice["Name"] }}'>{{ choice['Name'] }}</option>
                         {% endfor %}
                     </select>
+                    <label for="latitude-input">Latitude</label>
                     <input type='number' id='latitude-input' name='Latitude' readonly required>
+                    <label for="longitude-input">Longitude</label>
                     <input type='number' id='longitude-input' name='Longitude' readonly required>
+                    <label for="housemedage-input">House Median Age</label>
+                    <input type='number' id='housemedage-input' name='HouseMedAge' required>
+                    <label for="totlrooms-input">Total Rooms</label>
+                    <input type='number' id='totlrooms-input' name='TotRooms' required>
+                    <label for="totlrooms-input">Total Bedrooms</label>
+                    <input type='number' id='totlrooms-input' name='TotBedrooms' required>
+                    <label for="population-input">Population</label>
+                    <input type='number' id='population-input' name='Population' required>
+                    <label for="households-input">Households</label>
+                    <input type='number' id='households-input' name='Households' required>
+                    <label for="medincome-input">Median Income</label>
+                    <input type='number' id='medincome-input' name='MedIncome' required>
+                    <label for="oceanproximity-input">Ocean Proximity</label>
+                    <select id='oceanproximity-input' name='OceanProximity' required>
+                        <option value="NEAR_BAY">Near Bay</option>"
+                        <option value='INLAND'>Inland</option>
+                        <option value='1H_OCEAN'>Less than 1 hour to ocean</option>
+                        <option value='NEAR_OCEAN'>Near ocean</option>
+                        <option value='ISLAND'>Island</option>
+                    </select>
                     <br>
                     <input type="submit" id="submit-cta" value="Submit" disabled>
                 </form>
-                <p>{{prediction_text}}</p>
+                <p>{{ prediction_text }}</p>
             </div>
             <div class='col-md-6'>
                 <h4>State Map</h4>
