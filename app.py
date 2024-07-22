@@ -3,7 +3,7 @@ from sklearn.preprocessing import StandardScaler
 import numpy as np
 import joblib
 
-model = joblib.load('california_house_price_prediction_model.pkl')
+model = joblib.load('rf_model.pkl')
 
 app = Flask(__name__, template_folder = 'templates')
 
