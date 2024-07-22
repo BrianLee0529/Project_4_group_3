@@ -51,7 +51,7 @@ def predict():
     #predicted_price = round(model.predict(input_features_array)[0], 2)
 
     # Concat with text
-    prediction = "Estimated price of home in California is  $ {}".format(predicted_price)
+    prediction = "Estimated price of home in the selected California city is:  $ {}".format(predicted_price)
 
     return render_template("index.html", prediction_text=prediction, choices=csv_data)
 
