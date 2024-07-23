@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+
+<body>
+    <div class='container'>
+        <div class='row'>
+            <div class='col-md-12'>
+                <h1>California Housing Prices</h1>
+            </div>
+        </div>
+        <div class='row'>
+            <div class='col-md-6'>
+                <form action="/predict" method='post' class="container">
+                    <div class="row">
+                        <label for="city-input" class="form-label">City</label>
+                        <select id="city-input" name='City' class="form-control">
+                            {% for choice in choices %}
+                            <option value='{{ choice["Name"] }}'>{{ choice['Name'] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row">
+                        <label for="latitude-input" class="form-label">Latitude</label>
+                        <input type='number' id='latitude-input' name='Latitude' readonly required class="form-control">
+                    </div>
+                    <div class="row">
+                        <label for="longitude-input" class="form-label">Longitude</label>
+                        <input type='number' id='longitude-input' name='Longitude' readonly required
+                            class="form-control">
+                    </div>
+                    <div class="row">
+                        <label for="housemedage-input" class="form-label">House Median Age</label>
+                        <input type='number' id='housemedage-input' name='HouseMedAge' required class="form-control">
+                    </div>
+                    <div class="row">
+                        <label for="totlrooms-input" class="form-label">Total Rooms</label>
+                        <input type='number' id='totlrooms-input' name='TotRooms' required class="form-control">
+                    </div>
+                    <div class="row">
+                        <label for="totbedrooms-input" class="form-label">Total Bedrooms</label>
+                        <input type='number' id='totbedrooms-input' name='TotBedrooms' required class="form-control">
+                    </div>
+                    <div class="row">
+                        <label for="population-input" class="form-label">Population</label>
+                        <input type='number' id='population-input' name='Population' required class="form-control">
+                    </div>
+                    <div class="row">
+                        <label for="households-input" class="form-label">Households</label>
+                        <input type='number' id='households-input' name='Households' required class="form-control">
+                    </div>
+                    <div class="row">
+                        <label for="medincome-input" class="form-label">Median Income</label>
+                        <input type='number' id='medincome-input' name='MedIncome' required class="form-control">
+                    </div>
+                    <div class="row">
+                        <label for="oceanproximity-input" class="form-label">Ocean Proximity</label>
+                        <select id='oceanproximity-input' name='OceanProximity' required class="form-control">
+                            <option value="NEAR_BAY">Near Bay</option>"
+                            <option value='INLAND'>Inland</option>
+                            <option value='1H_OCEAN'>Less than 1 hour to ocean</option>
+                            <option value='NEAR_OCEAN'>Near ocean</option>
+                            <option value='ISLAND'>Island</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <button type="submit" id="submit-cta" disabled class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+            <div class='col-md-6'>
+                <h4>State Map</h4>
+                <div id="map" class="w-100" style="height: 500px;"></div>
+                <h5>{{ prediction_text }}</h5>
+            </div>
+        </div>
+    </div>
+    <script>
+        const choices = {{ choices| tojson}};
+
+        const cityInput = document.getElementById('city-input');
+        const latitudeInput = document.getElementById('latitude-input');
+        const longitudeInput = document.getElementById('longitude-input');
+        const houseMedAgeInput = document.getElementById('housemedage-input');
+        const totRoomsInput = document.getElementById('totlrooms-input');
+        const totBedroomsInput = document.getElementById('totbedrooms-input');
+        const populationInput = document.getElementById('population-input');
+        const householdsInput = document.getElementById('households-input');
+        const medIncomeInput = document.getElementById('medincome-input');
+        const oceanProximityInput = document.getElementById('oceanproximity-input');
+        const submitButton = document.getElementById('submit-cta');
+
+        const map = L.map('map').setView([37.7749, -122.4194], 6);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        function onSelectCity(city) {
+            localStorage.setItem('selectedCity', city.Name);
+
+            latitudeInput.value = city.Latitude;
+            longitudeInput.value = city.Longitude;
+            submitButton.disabled = false;
+
+            map.eachLayer((layer) => {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            const marker = L.marker([city.Latitude, city.Longitude]).addTo(map);
+            marker.bindPopup('<b>' + city.Name + '</b><br>Latitude: ' + city.Latitude + '<br>Longitude: ' + city.Longitude).openPopup();
+            map.setView([city.Latitude, city.Longitude], 9);
+        }
+
+        cityInput.addEventListener('change', (event) => {
+            const selectedCity = choices.find(choice => choice.Name === event.target.value);
+            onSelectCity(selectedCity);
+        });
+
+        houseMedAgeInput.addEventListener('change', (event) => {
+            localStorage.setItem('houseMedAge', event.target.value);
+        });
+
+        totRoomsInput.addEventListener('change', (event) => {
+            localStorage.setItem('totRooms', event.target.value);
+        });
+
+        totBedroomsInput.addEventListener('change', (event) => {
+            localStorage.setItem('totBedrooms', event.target.value);
+        });
+
+        populationInput.addEventListener('change', (event) => {
+            localStorage.setItem('population', event.target.value);
+        });
+
+        householdsInput.addEventListener('change', (event) => {
+            localStorage.setItem('households', event.target.value);
+        });
+
+        medIncomeInput.addEventListener('change', (event) => {
+            localStorage.setItem('medIncome', event.target.value);
+        });
+
+        oceanProximityInput.addEventListener('change', (event) => {
+            localStorage.setItem('oceanProximity', event.target.value);
+        });
+
+
+        const houseMedAge = localStorage.getItem('houseMedAge');
+        if (houseMedAge) {
+            houseMedAgeInput.value = houseMedAge;
+        }
+
+        const totRooms = localStorage.getItem('totRooms');
+        if (totRooms) {
+            totRoomsInput.value = totRooms;
+        }
+
+        const totBedrooms = localStorage.getItem('totBedrooms');
+        if (totBedrooms) {
+            totBedroomsInput.value = totBedrooms;
+        }
+
+        const population = localStorage.getItem('population');
+        if (population) {
+            populationInput.value = population;
+        }
+
+        const households = localStorage.getItem('households');
+        if (households) {
+            householdsInput.value = households;
+        }
+
+        const medIncome = localStorage.getItem('medIncome');
+        if (medIncome) {
+            medIncomeInput.value = medIncome;
+        }
+
+        const oceanProximity = localStorage.getItem('oceanProximity');
+        if (oceanProximity) {
+            oceanProximityInput.value = oceanProximity;
+        }
+
+        const selectedCity = localStorage.getItem('selectedCity');
+        const city = choices.find(choice => choice.Name === selectedCity) || choices[0];
+        cityInput.value = city.Name;
+        onSelectCity(city);
+    </script>
+</body>
+
+</html>
