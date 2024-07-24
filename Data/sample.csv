@@ -1,0 +1,2 @@
+longitude,latitude,housing_median_age,population,households,median_income,avg_rooms_per_household,avg_bedrooms_per_household,ocean_proximity_<1H OCEAN,ocean_proximity_INLAND,ocean_proximity_ISLAND,ocean_proximity_NEAR BAY,ocean_proximity_NEAR OCEAN
+-122.23,37.88,41,322,126,8.3252,6,3,0,0,0,1,0
