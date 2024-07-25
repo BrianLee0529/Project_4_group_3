@@ -1,6 +1,12 @@
 # Project_4_group_3
 
+## Instructions on Use and Interaction
+1. Install the needed dependencies located in the top of the supervised.ipynb notebook
+2. Run this notebook to create and load the machine learning model
+3. In order to run the app.py after step 2 scikit learn version 1.3.100 needs to be installed
+4. ONce the above steps are completed you can run the app.py 
 
+## Project Information
 Housing Market prediction_California
 
 California Real state
