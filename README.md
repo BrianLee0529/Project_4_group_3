@@ -2,6 +2,8 @@
 
 ## Instructions on Use and Interaction
 
+
+## Project Information
 Housing Market prediction_California
 
 California Real state
